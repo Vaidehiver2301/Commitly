@@ -36,7 +36,7 @@ export const ChallengesPage: React.FC = () => {
     return (
         <div className="p-4">
             <header className="mb-8">
-                <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-100">Daily Challenges</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 dark:text-gray-100">Daily Challenges</h1>
                 <p className="text-center text-gray-500 dark:text-gray-400 mt-2">Complete these tasks to earn extra XP and build your skills!</p>
             </header>
             

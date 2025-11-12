@@ -26,7 +26,7 @@ export const LeaderboardPage: React.FC = () => {
     return (
         <div className="p-4">
             <header className="mb-8">
-                <h1 className="text-4xl font-bold text-center text-gray-800 dark:text-gray-100">Leaderboard</h1>
+                <h1 className="text-3xl sm:text-4xl font-bold text-center text-gray-800 dark:text-gray-100">Leaderboard</h1>
                 <p className="text-center text-gray-500 dark:text-gray-400 mt-2">See who's at the top of their game!</p>
             </header>
 

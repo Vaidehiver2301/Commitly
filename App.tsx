@@ -11,6 +11,7 @@ import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LandingPage } from './pages/LandingPage';
+import { PracticeSheetsPage } from './pages/PracticeSheetsPage';
 import { PublicLayout } from './components/PublicLayout';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
@@ -42,6 +43,7 @@ const AppContent: React.FC = () => {
             <Routes>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/session" element={<SessionPage />} />
+                <Route path="/practice" element={<PracticeSheetsPage />} />
                 <Route path="/challenges" element={<ChallengesPage />} />
                 <Route path="/leaderboard" element={<LeaderboardPage />} />
                 <Route path="/friends" element={<FriendsPage />} />

@@ -62,7 +62,7 @@ export const ProfilePage: React.FC = () => {
             <Card className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
                 <img src={user.avatarUrl} alt={user.name} className="w-32 h-32 rounded-full shadow-lg" />
                 <div className="flex-grow text-center md:text-left">
-                    <h1 className="text-4xl font-bold">{user.name}</h1>
+                    <h1 className="text-3xl sm:text-4xl font-bold">{user.name}</h1>
                     <LevelBadge levelName={user.level} size="lg" />
                     <p className="text-gray-500 dark:text-gray-400 mt-2">Learning {user.learningLanguage}</p>
                 </div>

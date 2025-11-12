@@ -128,7 +128,7 @@ export const DashboardPage: React.FC = () => {
     return (
         <div className="space-y-8 p-4">
             <header className="animate-slideInUp">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100">Welcome back, {user.name}!</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">Welcome back, {user.name}!</h2>
                 <p className="text-lg text-gray-500 dark:text-gray-400 italic mt-2">"{quote}"</p>
             </header>
 

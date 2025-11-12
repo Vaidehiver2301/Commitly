@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
@@ -11,78 +12,211 @@ import { useSettings } from '../contexts/SettingsContext';
 import { useSessionFocus } from '../contexts/SessionFocusContext';
 import { Confetti } from '../components/common/Confetti';
 
-const TimerDisplay: React.FC<{ timeLeft: number }> = ({ timeLeft }) => {
+// NEW ICONS
+const PauseIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+);
+
+const StopIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><rect x="6" y="6" width="12" height="12"></rect></svg>
+);
+
+const PlayIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+);
+
+
+interface TimerUIProps {
+    duration: number; // initial duration in minutes
+    timeLeft: number; // seconds remaining
+    timerStatus: 'idle' | 'running' | 'paused';
+    onStart: () => void;
+    onPause: () => void;
+    onResume: () => void;
+    onStop: () => void;
+    setDuration: (minutes: number) => void;
+}
+
+const TimerUI: React.FC<TimerUIProps> = ({ duration, timeLeft, timerStatus, onStart, onPause, onResume, onStop, setDuration }) => {
     const minutes = Math.floor(timeLeft / 60);
     const seconds = timeLeft % 60;
-    return (
-        <div className="text-9xl font-bold text-center text-gray-800 dark:text-gray-100 my-8 tabular-nums tracking-tighter">
-            {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-        </div>
-    );
-};
 
-const Quiz: React.FC<{ questions: QuizQuestion[], onFinish: () => void }> = ({ questions, onFinish }) => {
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-    const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
-    const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
-
-    const handleAnswer = (option: string) => {
-        if (selectedAnswer) return;
-        
-        setSelectedAnswer(option);
-        const correct = option === questions[currentQuestionIndex].correctAnswer;
-        setIsCorrect(correct);
-    };
-
-    const handleNext = () => {
-        setSelectedAnswer(null);
-        setIsCorrect(null);
-        if (currentQuestionIndex < questions.length - 1) {
-            setCurrentQuestionIndex(i => i + 1);
-        } else {
-            onFinish();
-        }
-    }
-
-    if (!questions.length) {
-        return <p>No questions available.</p>;
-    }
+    const radius = 75;
+    const circumference = 2 * Math.PI * radius;
+    const totalSeconds = duration * 60;
     
-    const { question, options } = questions[currentQuestionIndex];
+    // Ensure progress calculation handles totalSeconds being 0 to avoid NaN or division by zero.
+    const progress = totalSeconds > 0 ? timeLeft / totalSeconds : 0;
+    const strokeDashoffset = circumference * (1 - progress);
+
+    const isIdle = timerStatus === 'idle';
+    const isRunning = timerStatus === 'running';
+    const isPaused = timerStatus === 'paused';
 
     return (
-        <div className="w-full max-w-2xl mx-auto">
-             <p className="text-center text-gray-500 dark:text-gray-400 mb-2">Question {currentQuestionIndex + 1} of {questions.length}</p>
-             <h3 className="text-2xl font-semibold text-center mb-6">{question}</h3>
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 {options.map(option => {
-                     const isSelected = selectedAnswer === option;
-                     const isCorrectAnswer = isCorrect !== null && option === questions[currentQuestionIndex].correctAnswer;
-                     let buttonClass = 'bg-white hover:bg-gray-100 border-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:border-gray-500';
-                     if (isSelected && isCorrect === true) buttonClass = 'bg-green-500 border-green-500 text-white';
-                     if (isSelected && isCorrect === false) buttonClass = 'bg-red-500 border-red-500 text-white';
-                     if (!isSelected && isCorrect !== null && isCorrectAnswer) buttonClass = 'bg-green-500 border-green-500 text-white dark:bg-green-600 dark:border-green-600';
-                     
-                     return (
-                        <button key={option} onClick={() => handleAnswer(option)} disabled={!!selectedAnswer} className={`p-4 rounded-lg border-2 text-left transition-colors ${buttonClass}`}>
-                            {option}
-                        </button>
-                     )
-                 })}
-             </div>
-             {selectedAnswer && (
-                 <div className="text-center mt-6">
-                     <p className={`text-xl font-bold ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                         {isCorrect ? 'Correct!' : 'Incorrect!'}
-                     </p>
-                     <Button onClick={handleNext} className="mt-4">
-                        {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
-                     </Button>
-                 </div>
-             )}
-        </div>
+        <Card className="max-w-md mx-auto !p-8 dark:bg-gray-800 flex flex-col items-center">
+            {/* Circular Timer Display */}
+            <div className="relative w-[180px] h-[180px] flex items-center justify-center mb-8">
+                <svg className="w-full h-full transform -rotate-90">
+                    {/* Background track */}
+                    <circle
+                        cx="90"
+                        cy="90"
+                        r={radius}
+                        stroke="#2f3b4d" // A slightly darker grey for the track
+                        strokeWidth="12"
+                        fill="transparent"
+                    />
+                    {/* Progress circle */}
+                    <circle
+                        cx="90"
+                        cy="90"
+                        r={radius}
+                        stroke="#e0e0e0" // Light grey for the progress
+                        strokeWidth="12"
+                        fill="transparent"
+                        strokeDasharray={circumference}
+                        strokeDashoffset={strokeDashoffset}
+                        strokeLinecap="round"
+                        className="transition-all duration-1000 ease-linear"
+                    />
+                </svg>
+                <div className="absolute text-5xl font-bold text-gray-100 tabular-nums">
+                    {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                </div>
+            </div>
+
+            {/* Control Buttons */}
+            <div className="flex space-x-4 mb-8">
+                <Button 
+                    onClick={isIdle ? onStart : onResume} 
+                    disabled={isRunning} // Cannot click Start/Resume if already running
+                    className="!bg-[#2f3b4d] text-gray-100 hover:!bg-[#3f4a5b] !shadow-none px-6 py-3 rounded-md !flex !items-center !justify-center"
+                >
+                    <PlayIcon className="w-5 h-5 mr-2" /> {isPaused ? 'Resume' : 'Start'}
+                </Button>
+                <Button 
+                    onClick={onPause} 
+                    disabled={isIdle || isPaused} // Can only pause if running
+                    className="!bg-[#2f3b4d] text-gray-100 hover:!bg-[#3f4a5b] !shadow-none px-6 py-3 rounded-md !flex !items-center !justify-center"
+                >
+                    <PauseIcon className="w-5 h-5 mr-2" /> Pause
+                </Button>
+                <Button 
+                    onClick={onStop} 
+                    disabled={isIdle} // Can only stop if running or paused
+                    className="!bg-[#2f3b4d] text-gray-100 hover:!bg-[#3f4a5b] !shadow-none px-6 py-3 rounded-md !flex !items-center !justify-center"
+                >
+                    <StopIcon className="w-5 h-5 mr-2" /> Stop
+                </Button>
+            </div>
+
+            {/* Minutes Input */}
+            <div className="flex items-center space-x-4 bg-[#2f3b4d] p-3 rounded-md">
+                <label htmlFor="duration-input" className="text-gray-200 text-lg">Minutes</label>
+                <input
+                    id="duration-input"
+                    type="number"
+                    value={duration}
+                    onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        const newDuration = Math.max(1, val || 1);
+                        setDuration(newDuration);
+                        // The useEffect in SessionPage will handle updating timeLeft if timerStatus is 'idle'.
+                    }}
+                    className="w-24 px-4 py-2 bg-gray-700 text-gray-100 rounded-md text-center border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    min="1"
+                    disabled={isRunning} // Cannot change duration while running
+                />
+            </div>
+        </Card>
     );
 };
+
+// FIX: Define the Quiz component
+interface QuizProps {
+  questions: QuizQuestion[];
+  onFinish: () => void;
+}
+
+const Quiz: React.FC<QuizProps> = ({ questions, onFinish }) => {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  const [score, setScore] = useState(0);
+  const [quizFinished, setQuizFinished] = useState(false);
+
+  const currentQuestion = questions[currentQuestionIndex];
+
+  const handleAnswerSelect = (answer: string) => {
+    setSelectedAnswer(answer);
+  };
+
+  const handleSubmitAnswer = () => {
+    if (selectedAnswer === currentQuestion.correctAnswer) {
+      setScore(prevScore => prevScore + 1);
+    }
+    // Move to next question or finish quiz
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(prevIndex => prevIndex + 1);
+      setSelectedAnswer(null); // Reset selected answer for next question
+    } else {
+      setQuizFinished(true);
+    }
+  };
+
+  const handleFinishQuiz = () => {
+    onFinish();
+  };
+
+  if (questions.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+        No quiz questions available.
+      </div>
+    );
+  }
+
+  if (quizFinished) {
+    return (
+      <div className="text-center">
+        <h3 className="text-2xl font-bold mb-4">Quiz Complete!</h3>
+        <p className="text-xl mb-4">You scored {score} out of {questions.length}!</p>
+        <Button onClick={handleFinishQuiz}>Continue</Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <p className="text-lg font-semibold">Question {currentQuestionIndex + 1} of {questions.length}</p>
+      <p className="text-xl font-bold text-gray-800 dark:text-gray-100">{currentQuestion.question}</p>
+      <div className="grid grid-cols-1 gap-3">
+        {currentQuestion.options.map((option, index) => (
+          <button
+            key={index}
+            onClick={() => handleAnswerSelect(option)}
+            className={`w-full text-left px-4 py-3 rounded-lg border-2 transition-colors duration-200
+              ${selectedAnswer === option
+                ? 'bg-indigo-500 text-white border-indigo-500 shadow-md'
+                : 'bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-200'
+              }`}
+            disabled={!!selectedAnswer} // Disable options once an answer is selected
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+      <Button 
+        onClick={handleSubmitAnswer} 
+        disabled={!selectedAnswer} 
+        className="w-full"
+      >
+        {currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
+      </Button>
+    </div>
+  );
+};
+
 
 export const SessionPage: React.FC = () => {
     const { currentUser: user, refreshUser } = useAuth();
@@ -133,13 +267,21 @@ export const SessionPage: React.FC = () => {
         return () => window.clearInterval(interval);
     }, [timerStatus, timeLeft, duration, settings.sessionReminders, setSessionActive]);
 
+    // Ensure timeLeft is updated if duration changes while idle
+    useEffect(() => {
+      if (timerStatus === 'idle') {
+        setTimeLeft(duration * 60);
+      }
+    }, [duration, timerStatus]);
+
+
     if (!user) return null;
 
     const handleStart = () => {
         if (duration <= 0) return;
-        setTimeLeft(duration * 60);
+        setTimeLeft(duration * 60); // Ensure timeLeft is reset to full duration on start
         setTimerStatus('running');
-        setSessionStage('active');
+        setSessionStage('active'); // Keep active stage for tracking running status
         setSessionActive(true);
     };
 
@@ -182,7 +324,7 @@ export const SessionPage: React.FC = () => {
         setTimerStatus('idle');
         setTopic('');
         setQuestions([]);
-        setDuration(30);
+        setDuration(30); // Reset to default duration
         setShowConfetti(false);
     }
     
@@ -194,47 +336,18 @@ export const SessionPage: React.FC = () => {
                     onDismiss={() => setShowReminder(false)}
                 />
             )}
-            {sessionStage === 'config' && (
-                <Card className="max-w-md mx-auto animate-slideInUp">
-                    <h2 className="text-2xl font-bold mb-4">Start a new session</h2>
-                    <p className="text-gray-600 dark:text-gray-400 mb-6">Choose your focused study duration.</p>
-                    
-                    <div className="mb-6">
-                        <label htmlFor="duration-input" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">How many minutes?</label>
-                        <input
-                            id="duration-input"
-                            type="number"
-                            value={duration}
-                            onChange={(e) => setDuration(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                            className="w-full max-w-xs mx-auto px-4 py-2 border border-gray-300 rounded-lg text-center dark:bg-gray-700 dark:border-gray-600"
-                            min="1"
-                        />
-                    </div>
-
-                    <div className="flex justify-center space-x-4 mb-8">
-                        {[25, 50, 75].map(min => (
-                            <button key={min} onClick={() => setDuration(min)} className={`px-4 py-2 rounded-full border-2 transition-colors ${duration === min ? 'bg-indigo-600 text-white border-indigo-600' : 'text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                                {min} min
-                            </button>
-                        ))}
-                    </div>
-                    <Button onClick={handleStart} disabled={duration <= 0}>Start Session</Button>
-                </Card>
-            )}
-            
-            {sessionStage === 'active' && (
-                 <Card className="max-w-md mx-auto animate-fadeIn">
-                     <h2 className="text-2xl font-bold mb-4">{timerStatus === 'paused' ? 'Session Paused' : 'Stay Focused!'}</h2>
-                     <TimerDisplay timeLeft={timeLeft} />
-                     <div className="flex flex-col items-center space-y-4">
-                        {timerStatus === 'running' ? (
-                            <Button onClick={handlePause} variant="secondary" className="!w-48">Pause</Button>
-                        ) : (
-                            <Button onClick={handleResume} variant="primary" className="!w-48">Resume</Button>
-                        )}
-                         <Button onClick={handleStop} variant="ghost" className="!text-red-500 hover:!bg-red-100 dark:hover:!bg-red-900/40">End Session</Button>
-                     </div>
-                 </Card>
+            {/* Render the new TimerUI for config and active stages */}
+            {(sessionStage === 'config' || sessionStage === 'active') && (
+                <TimerUI
+                    duration={duration}
+                    timeLeft={timeLeft}
+                    timerStatus={timerStatus}
+                    onStart={handleStart}
+                    onPause={handlePause}
+                    onResume={handleResume}
+                    onStop={handleStop}
+                    setDuration={setDuration}
+                />
             )}
             
              {sessionStage === 'topic' && (
@@ -248,7 +361,7 @@ export const SessionPage: React.FC = () => {
                             value={topic}
                             onChange={(e) => setTopic(e.target.value)}
                             placeholder={`e.g., ${user.learningLanguage} Interfaces`}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 dark:bg-gray-700 dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500 dark:text-white"
                         />
                         <Button onClick={handleFetchQuiz} disabled={isLoadingQuiz || !topic}>
                             {isLoadingQuiz ? 'Generating...' : 'Take a Quick Quiz'}

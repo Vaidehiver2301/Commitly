@@ -26,9 +26,9 @@ const RequestCard: React.FC<{ user: User; onAccept: () => void; onDecline: () =>
             <p className="font-bold">{user.name}</p>
             <p className="text-sm text-gray-500 dark:text-gray-400">Wants to connect</p>
         </div>
-        <div className="flex space-x-2">
-            <Button onClick={onAccept} className="px-4 py-1.5 !bg-green-500 hover:!bg-green-600">Accept</Button>
-            <Button onClick={onDecline} variant="ghost" className="px-4 py-1.5">Decline</Button>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <Button onClick={onAccept} className="px-4 py-1.5 !bg-green-500 hover:!bg-green-600 w-full sm:w-auto">Accept</Button>
+            <Button onClick={onDecline} variant="ghost" className="px-4 py-1.5 w-full sm:w-auto">Decline</Button>
         </div>
     </div>
 );
@@ -115,7 +115,7 @@ export const FriendsPage: React.FC = () => {
                     placeholder="Search by name..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-500 dark:text-white"
                 />
                  {searchQuery.trim() && (
                     <div className="mt-4 space-y-3 max-h-60 overflow-y-auto">

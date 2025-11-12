@@ -20,6 +20,12 @@ export const MOTIVATIONAL_QUOTES: string[] = [
   "Strive for progress, not perfection."
 ];
 
+export const PRACTICE_SHEET_QUOTES: string[] = [
+    "Every bug you fix teaches you something new.",
+    "Tiny progress is still progress.",
+    "Code with consistency, not comparison.",
+];
+
 export const FOCUS_REMINDERS: string[] = [
   "You're doing great. Keep the focus!",
   "Just a little longer. You've got this.",
@@ -28,6 +34,8 @@ export const FOCUS_REMINDERS: string[] = [
   "Distractions can wait. Your future can't.",
   "Remember why you started. Keep pushing.",
 ];
+
+export const PIXI_WELCOME_MESSAGE = "Hey there, I'm Pixi! Your friendly AI coding assistant. Tiny helper. Big progress. I'm here to help you understand your code, explain errors, and guide you through your learning journey. What can I help you with?";
 
 const MOCK_SESSIONS: Session[] = [
     { id: 's1', date: new Date(Date.now() - 86400000).toISOString(), duration: 60, topic: 'Java Collections', language: Language.Java, xpGained: 50 },

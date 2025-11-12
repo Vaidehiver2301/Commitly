@@ -74,3 +74,24 @@ export interface NotificationSettings {
   dailyChallenges: boolean;
   sessionReminders: boolean;
 }
+
+export interface PracticeSheetLevel {
+  questions: string[];
+  motivation: string;
+}
+
+export interface PracticeSheet {
+  easy: PracticeSheetLevel;
+  medium: PracticeSheetLevel;
+  hard: PracticeSheetLevel;
+}
+
+export interface CodeExecutionResult {
+  output?: string;
+  error?: string;
+}
+
+export interface ChatMessage {
+  sender: 'user' | 'commi';
+  message: string;
+}
