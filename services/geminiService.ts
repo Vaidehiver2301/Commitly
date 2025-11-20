@@ -1,5 +1,4 @@
 
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { QuizQuestion, Language, PracticeSheet, CodeExecutionResult, ChatMessage } from "../types";
 
@@ -9,7 +8,8 @@ if (!API_KEY) {
   console.warn("Gemini API key not found. Using mock data. Please set process.env.API_KEY.");
 }
 
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+// Conditionally initialize `ai` only if API_KEY is present
+const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
 
 /**
  * Safely parses a JSON string, stripping markdown fences if present.
@@ -28,23 +28,23 @@ function safeParseJson<T>(jsonString: string): T {
 
 
 export const generateQuizQuestions = async (topic: string, language: Language): Promise<QuizQuestion[]> => {
-  if (!API_KEY) {
+  if (!ai || !API_KEY) { // Check if ai is initialized
     // Return mock data if API key is not available
     return new Promise((resolve) =>
       setTimeout(() => {
         resolve([
           {
-            question: `What is the main purpose of a 'for' loop in ${language}?`,
+            question: `MOCK: What is the main purpose of a 'for' loop in ${language}?`,
             options: ["To declare variables", "To execute a block of code repeatedly", "To handle exceptions", "To define a function"],
             correctAnswer: "To execute a block of code repeatedly",
           },
           {
-            question: "Which keyword is used to define a function in Python?",
+            question: "MOCK: Which keyword is used to define a function in Python?",
             options: ["func", "def", "function", "define"],
             correctAnswer: "def",
           },
           {
-            question: `What does 'System.out.println()' do in ${language}?`,
+            question: `MOCK: What does 'System.out.println()' do in ${language}?`,
             options: ["Reads input from the console", "Prints output to the console with a new line", "Creates a new file", "Calculates a mathematical expression"],
             correctAnswer: "Prints output to the console with a new line",
           },
@@ -76,7 +76,7 @@ export const generateQuizQuestions = async (topic: string, language: Language): 
     // Fallback to mock data on API error
     return [
         {
-          question: "API Error: What is a variable?",
+          question: "API Error (Mock): What is a variable?",
           options: ["A", "B", "C", "D"],
           correctAnswer: "A",
         },
@@ -85,12 +85,12 @@ export const generateQuizQuestions = async (topic: string, language: Language): 
 };
 
 export const generatePracticeSheet = async (topic: string, language: Language, numQuestions: number): Promise<PracticeSheet | null> => {
-  if (!API_KEY) {
+  if (!ai || !API_KEY) { // Check if ai is initialized
     console.warn("Gemini API key not found, returning mock practice sheet.");
     return new Promise(resolve => setTimeout(() => resolve({
-        easy: { questions: ["Easy Q1?", "Easy Q2?"], motivation: "Easy motivation!" },
-        medium: { questions: ["Medium Q1?", "Medium Q2?"], motivation: "Medium motivation!" },
-        hard: { questions: ["Hard Q1?", "Hard Q2?"], motivation: "Hard motivation!" },
+        easy: { questions: ["MOCK Easy Q1?", "MOCK Easy Q2?"], motivation: "Easy motivation!" },
+        medium: { questions: ["MOCK Medium Q1?", "MOCK Medium Q2?"], motivation: "Medium motivation!" },
+        hard: { questions: ["MOCK Hard Q1?", "MOCK Hard Q2?"], motivation: "Hard motivation!" },
     }), 1500));
   }
 
@@ -124,7 +124,7 @@ Do not include any other text or markdown formatting. The entire response must b
 };
 
 export const executeJavaCode = async (code: string): Promise<CodeExecutionResult> => {
-    if (!API_KEY) {
+    if (!ai || !API_KEY) { // Check if ai is initialized
         console.warn("Gemini API key not found, returning mock code execution result.");
         if (code.includes("error")) {
              return new Promise(resolve => setTimeout(() => resolve({
@@ -132,7 +132,7 @@ export const executeJavaCode = async (code: string): Promise<CodeExecutionResult
              }), 1000));
         }
         return new Promise(resolve => setTimeout(() => resolve({
-            output: "Hello, Commitly User!"
+            output: "MOCK: Hello, Commitly User!"
         }), 1000));
     }
     
@@ -164,7 +164,7 @@ ${code}
 };
 
 export const chatWithCommi = async (code: string, userMessage: string, chatHistory: ChatMessage[], language: Language): Promise<string> => {
-  if (!API_KEY) {
+  if (!ai || !API_KEY) { // Check if ai is initialized
     console.warn("Gemini API key not found, Pixi will not respond.");
     return "Hi there! My API key isn't set up, so I can't chat right now. Please tell your developer to set `process.env.API_KEY`.";
   }
@@ -213,7 +213,7 @@ export const chatWithCommi = async (code: string, userMessage: string, chatHisto
 };
 
 export const getPixiErrorExplanation = async (code: string, rawErrorMessage: string, language: Language): Promise<string> => {
-  if (!API_KEY) {
+  if (!ai || !API_KEY) { // Check if ai is initialized
     console.warn("Gemini API key not found, Pixi will not respond with error explanation.");
     return "Hi there! My API key isn't set up, so I can't explain errors right now. Please tell your developer to set `process.env.API_KEY`.";
   }
