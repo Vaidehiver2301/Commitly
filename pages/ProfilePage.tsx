@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LEVELS } from '../constants';
@@ -15,7 +16,7 @@ const FireIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M14.5 4.5A5 5 0 0 0 9.5 0 5 5 0 0 0 4.5 4.5c0 2.924 2.16 5.343 5 5.343A5.002 5.002 0 0 0 14.5 4.5zM9.5 9.843c-2.84 0-5 2.419-5 5.343A5 5 0 0 0 9.5 20a5 5 0 0 0 5-4.814c0-2.924-2.16-5.343-5-5.343z"/></svg>
 );
 const XPIcon = (props: React.SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15.5 7.5 2.3 2.3c.2.2.2.5 0 .7l-5.2 5.2c-.1.1-.3.2-.4.2l-2.8.3c0-.2-.4-.2-.4-.4l.3-2.8c0-.2.1-.3.2-.4l5.2-5.2c.2-.2.5-.2.7 0Z"/><path d="m21.5 2.5-1.9 1.9c-.2.2-.5.2-.7 0l-1.4-1.4c-.2-.2-.2-.5 0-.7l1.9-1.9c.2-.2.5-.2.7 0l1.4 1.4c.2.2.2.5 0 .7Z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m15.5 7.5 2.3 2.3c.2.2.2.5 0 .7l-5.2 5.2c-.1.1-.3.2-.4.2l-2.8.3c-.2 0-.4-.2-.4-.4l.3-2.8c0-.2.1-.3.2-.4l5.2-5.2c.2-.2.5-.2.7 0Z"/><path d="m21.5 2.5-1.9 1.9c-.2.2-.5.2-.7 0l-1.4-1.4c-.2-.2-.2-.5 0-.7l1.9-1.9c.2-.2.5-.2.7 0l1.4 1.4c.2.2.2.5 0 .7Z"/></svg>
 );
 const CodeIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>

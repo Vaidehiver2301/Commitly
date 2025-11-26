@@ -1,4 +1,5 @@
 
+
 import { MOCK_USERS, MOCK_CHALLENGES, MOCK_FOLLOW_REQUESTS, LEVELS, MOTIVATIONAL_QUOTES } from '../constants';
 import { User, Challenge, FollowRequest, Session, LevelName, Language, Motivation } from '../types';
 
@@ -64,24 +65,20 @@ const getLevelForXp = (xp: number): LevelName => {
 
 export const updateUserProfile = (userId: string, updates: Partial<User>) => {
   const db = readDB();
-  const userIndex = db.users.findIndex(u => u.id === userId);
-  if (userIndex === -1) {
+  const user = db.users.find(u => u.id === userId);
+  if (!user) {
       console.warn(`[db] User with id ${userId} not found for update.`);
       return;
   }
 
-  const existingUser = db.users[userIndex];
-  // Create a new user object by spreading the existing user and then applying updates
-  const updatedUser = { ...existingUser, ...updates };
+  // Apply updates
+  Object.assign(user, updates);
 
   // Recalculate level if XP changed (or ensure it's up-to-date)
-  updatedUser.level = getLevelForXp(updatedUser.xp);
+  user.level = getLevelForXp(user.xp);
 
-  // Create a new array of users with the updated user at the correct index
-  const updatedUsersArray = [...db.users];
-  updatedUsersArray[userIndex] = updatedUser;
-
-  writeDB({ ...db, users: updatedUsersArray });
+  const updatedUsers = db.users.map(u => u.id === userId ? user : u);
+  writeDB({ ...db, users: updatedUsers });
 };
 
 export const updateUser = (updatedUser: User) => {
