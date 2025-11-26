@@ -1,15 +1,15 @@
 
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { QuizQuestion, Language, PracticeSheet, CodeExecutionResult, ChatMessage } from "../types";
 
 const API_KEY = process.env.API_KEY;
 
-if (!API_KEY) {
-  console.warn("Gemini API key not found. Using mock data. Please set process.env.API_KEY.");
-}
-
-// Conditionally initialize `ai` only if API_KEY is present
-const ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
+// Strictly initialize `ai` without conditional null.
+// This will cause a crash if API_KEY is undefined at runtime,
+// forcing the resolution of the API key environment variable issue
+// as per the guidelines to "not generate mocks".
+const ai = new GoogleGenAI({ apiKey: API_KEY });
 
 /**
  * Safely parses a JSON string, stripping markdown fences if present.
@@ -28,31 +28,6 @@ function safeParseJson<T>(jsonString: string): T {
 
 
 export const generateQuizQuestions = async (topic: string, language: Language): Promise<QuizQuestion[]> => {
-  if (!ai || !API_KEY) { // Check if ai is initialized
-    // Return mock data if API key is not available
-    return new Promise((resolve) =>
-      setTimeout(() => {
-        resolve([
-          {
-            question: `MOCK: What is the main purpose of a 'for' loop in ${language}?`,
-            options: ["To declare variables", "To execute a block of code repeatedly", "To handle exceptions", "To define a function"],
-            correctAnswer: "To execute a block of code repeatedly",
-          },
-          {
-            question: "MOCK: Which keyword is used to define a function in Python?",
-            options: ["func", "def", "function", "define"],
-            correctAnswer: "def",
-          },
-          {
-            question: `MOCK: What does 'System.out.println()' do in ${language}?`,
-            options: ["Reads input from the console", "Prints output to the console with a new line", "Creates a new file", "Calculates a mathematical expression"],
-            correctAnswer: "Prints output to the console with a new line",
-          },
-        ]);
-      }, 1000)
-    );
-  }
-
   const prompt = `Generate 3-5 short, multiple-choice quiz questions for a beginner learning about "${topic}" in ${language}.
   Ensure the questions are clear and concise.
   Return ONLY a valid JSON object with a single key "questions", which is an array of question objects.
@@ -73,27 +48,16 @@ export const generateQuizQuestions = async (topic: string, language: Language): 
 
   } catch (error) {
     console.error("Error generating quiz questions with Gemini:", error);
-    // Fallback to mock data on API error
-    return [
-        {
-          question: "API Error (Mock): What is a variable?",
-          options: ["A", "B", "C", "D"],
-          correctAnswer: "A",
-        },
-      ];
+    // Fallback to a user-friendly error message on API error
+    return [{
+        question: "Failed to generate quiz questions. Please try again later.",
+        options: ["A", "B", "C"],
+        correctAnswer: "A"
+    }];
   }
 };
 
 export const generatePracticeSheet = async (topic: string, language: Language, numQuestions: number): Promise<PracticeSheet | null> => {
-  if (!ai || !API_KEY) { // Check if ai is initialized
-    console.warn("Gemini API key not found, returning mock practice sheet.");
-    return new Promise(resolve => setTimeout(() => resolve({
-        easy: { questions: ["MOCK Easy Q1?", "MOCK Easy Q2?"], motivation: "Easy motivation!" },
-        medium: { questions: ["MOCK Medium Q1?", "MOCK Medium Q2?"], motivation: "Medium motivation!" },
-        hard: { questions: ["MOCK Hard Q1?", "MOCK Hard Q2?"], motivation: "Hard motivation!" },
-    }), 1500));
-  }
-
   const prompt = `Generate practice coding questions about '${topic}' in ${language}.
 Create exactly ${numQuestions} coding problems for each of the three distinct difficulty levels: Easy, Medium, and Hard.
 All questions must be coding exercises or problems to solve, not conceptual or debugging questions.
@@ -124,18 +88,6 @@ Do not include any other text or markdown formatting. The entire response must b
 };
 
 export const executeJavaCode = async (code: string): Promise<CodeExecutionResult> => {
-    if (!ai || !API_KEY) { // Check if ai is initialized
-        console.warn("Gemini API key not found, returning mock code execution result.");
-        if (code.includes("error")) {
-             return new Promise(resolve => setTimeout(() => resolve({
-                error: "Mock Error: Main method not found in class HelloWorld, please define the main method as:\n   public static void main(String[] args)\nor a JavaFX application class must extend javafx.application.Application"
-             }), 1000));
-        }
-        return new Promise(resolve => setTimeout(() => resolve({
-            output: "MOCK: Hello, Commitly User!"
-        }), 1000));
-    }
-    
     const prompt = `You are a Java code interpreter. Execute the following Java code.
 - The code must be a complete, runnable Java program with a \`main\` method.
 - If the code compiles and runs successfully, return the standard output.
@@ -164,11 +116,6 @@ ${code}
 };
 
 export const chatWithCommi = async (code: string, userMessage: string, chatHistory: ChatMessage[], language: Language): Promise<string> => {
-  if (!ai || !API_KEY) { // Check if ai is initialized
-    console.warn("Gemini API key not found, Pixi will not respond.");
-    return "Hi there! My API key isn't set up, so I can't chat right now. Please tell your developer to set `process.env.API_KEY`.";
-  }
-
   const historyContent = chatHistory.map(msg => ({
     text: `${msg.sender === 'user' ? 'User' : 'Pixi'}: ${msg.message}`
   }));
@@ -213,11 +160,6 @@ export const chatWithCommi = async (code: string, userMessage: string, chatHisto
 };
 
 export const getPixiErrorExplanation = async (code: string, rawErrorMessage: string, language: Language): Promise<string> => {
-  if (!ai || !API_KEY) { // Check if ai is initialized
-    console.warn("Gemini API key not found, Pixi will not respond with error explanation.");
-    return "Hi there! My API key isn't set up, so I can't explain errors right now. Please tell your developer to set `process.env.API_KEY`.";
-  }
-
   const systemInstruction = `You are Pixi, a friendly, encouraging, and helpful AI coding assistant for Commitly. Your goal is to guide users through their ${language} coding problems and error messages without giving direct answers.
   Tiny helper. Big progress.
   

@@ -1,4 +1,5 @@
 
+
 import React, { useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LEVELS } from '../constants';
@@ -52,7 +53,7 @@ export const ProfilePage: React.FC = () => {
     const user = db.getUser(userId!);
     const isCurrentUser = userId === currentUser?.id;
 
-    // Initialize newName when user or editing status changes
+    // Initialize newName and newAvatarPreview when user or editing status changes
     React.useEffect(() => {
         if (user) {
             setNewName(user.name);
@@ -90,31 +91,24 @@ export const ProfilePage: React.FC = () => {
         if (isEditing) {
             setNewName(user.name);
             setNewAvatarFile(null);
-            setNewAvatarPreview(user.avatarUrl);
-            console.log("Edit cancelled. Resetting to:", user.name, user.avatarUrl);
-        } else {
-            console.log("Entering edit mode for user:", user.name, user.avatarUrl);
+            setNewAvatarPreview(user.avatarUrl); // Revert preview to original avatar
         }
     };
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNewName(e.target.value);
-        console.log("New name input:", e.target.value);
     };
 
     const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            console.log("Selected avatar file:", file.name, file.type);
             setNewAvatarFile(file);
             const previewUrl = await fileToBase64(file);
             setNewAvatarPreview(previewUrl);
-            console.log("New avatar preview generated (Base64 length):", previewUrl.length);
         }
     };
 
     const handleSaveProfile = async () => {
-        console.log("Attempting to save profile...");
         if (!user || !isCurrentUser) {
             console.warn("Save aborted: User not found or not current user.");
             return;
@@ -123,31 +117,20 @@ export const ProfilePage: React.FC = () => {
         const updates: Partial<User> = {};
         if (newName.trim() !== user.name) {
             updates.name = newName.trim();
-            console.log("Name changed:", user.name, "->", updates.name);
         }
 
-        // Check if a new avatar file was explicitly selected
-        // We ensure newAvatarFile is not null AND that the preview URL is different from the original (to avoid saving the same thing)
-        if (newAvatarFile && newAvatarPreview && newAvatarPreview !== user.avatarUrl) {
+        // Check if a new avatar file was explicitly selected AND the preview is a non-empty string AND it's different from the original
+        if (newAvatarFile && newAvatarPreview && typeof newAvatarPreview === 'string' && newAvatarPreview.length > 0 && newAvatarPreview !== user.avatarUrl) {
             updates.avatarUrl = newAvatarPreview; // This is already the Base64 string
-            console.log("Avatar changed (new Base64 length):", updates.avatarUrl.length);
-        } else if (newAvatarFile && newAvatarPreview === user.avatarUrl) {
-            console.warn("New avatar file selected, but preview matches old avatar URL. Skipping avatar update.");
         }
         
-        console.log("Updates prepared:", updates);
-
         if (Object.keys(updates).length > 0) {
-            console.log("Calling db.updateUserProfile with:", user.id, updates);
             db.updateUserProfile(user.id, updates);
-            console.log("Profile updated in DB. Refreshing user context...");
             refreshUser(); // Update the currentUser state in AuthContext
-            console.log("User context refreshed.");
         } else {
             console.log("No changes detected, skipping DB update.");
         }
         setIsEditing(false); // Exit editing mode
-        console.log("Exiting edit mode.");
     };
 
     const currentLevel = LEVELS.find(l => l.name === user.level) || LEVELS[0];
