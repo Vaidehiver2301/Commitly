@@ -110,7 +110,6 @@ export const ProfilePage: React.FC = () => {
 
     const handleSaveProfile = async () => {
         if (!user || !isCurrentUser) {
-            console.warn("Save aborted: User not found or not current user.");
             return;
         }
 
@@ -119,8 +118,8 @@ export const ProfilePage: React.FC = () => {
             updates.name = newName.trim();
         }
 
-        // Check if a new avatar file was explicitly selected AND the preview is a non-empty string AND it's different from the original
-        if (newAvatarFile && newAvatarPreview && typeof newAvatarPreview === 'string' && newAvatarPreview.length > 0 && newAvatarPreview !== user.avatarUrl) {
+        // Only update avatar if a new file was selected and it's different from current
+        if (newAvatarFile && newAvatarPreview && newAvatarPreview !== user.avatarUrl) {
             updates.avatarUrl = newAvatarPreview; // This is already the Base64 string
         }
         

@@ -67,7 +67,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setCurrentUser(user);
         } else {
             setCurrentUser(null);
-            console.warn("[AuthContext] Failed to refresh user data (user not found after refresh).");
         }
     }
 

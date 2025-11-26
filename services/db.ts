@@ -1,5 +1,4 @@
 
-
 import { MOCK_USERS, MOCK_CHALLENGES, MOCK_FOLLOW_REQUESTS, LEVELS, MOTIVATIONAL_QUOTES } from '../constants';
 import { User, Challenge, FollowRequest, Session, LevelName, Language, Motivation } from '../types';
 
@@ -16,7 +15,6 @@ interface Database {
 // Initialize the database from localStorage or with mock data
 export const initDB = () => {
   if (!localStorage.getItem(DB_KEY)) {
-    console.log("Initializing database with mock data...");
     const db: Database = {
       users: MOCK_USERS,
       challenges: MOCK_CHALLENGES,
@@ -25,7 +23,6 @@ export const initDB = () => {
       currentUserId: null,
     };
     localStorage.setItem(DB_KEY, JSON.stringify(db));
-    console.log("Database initialized.");
   }
 };
 
@@ -33,7 +30,6 @@ export const initDB = () => {
 const readDB = (): Database => {
   const dbString = localStorage.getItem(DB_KEY);
   if (!dbString) {
-    console.warn("Database not found in localStorage, initializing...");
     initDB();
     // Re-read after initializing
     const newDbString = localStorage.getItem(DB_KEY);
@@ -67,7 +63,6 @@ export const updateUserProfile = (userId: string, updates: Partial<User>) => {
   const db = readDB();
   const user = db.users.find(u => u.id === userId);
   if (!user) {
-      console.warn(`[db] User with id ${userId} not found for update.`);
       return;
   }
 
@@ -91,7 +86,6 @@ export const updateLearningLanguage = (userId: string, newLanguage: Language) =>
   const db = readDB();
   const user = db.users.find(u => u.id === userId);
   if (!user) {
-      console.warn(`[db] User with id ${userId} not found for language update.`);
       return;
   }
 
@@ -111,7 +105,6 @@ export const getCurrentUser = (): User | null => {
     }
     const user = db.users.find(u => u.id === db.currentUserId);
     if (!user) {
-        console.warn(`[db] Current user with ID ${db.currentUserId} not found in users array.`);
         return null;
     }
     return user;
@@ -175,7 +168,6 @@ export const sendFollowRequest = (fromUserId: string, toUserId: string) => {
     // 1. Check if they are already friends
     const fromUser = db.users.find(u => u.id === fromUserId);
     if (fromUser?.friends.includes(toUserId)) {
-        console.warn(`[db] Request not sent: ${fromUserId} and ${toUserId} are already friends.`);
         return;
     }
     
@@ -185,7 +177,6 @@ export const sendFollowRequest = (fromUserId: string, toUserId: string) => {
         (req.fromUserId === toUserId && req.toUserId === fromUserId)
     );
     if (existingRequest) {
-        console.warn(`[db] Request not sent: Existing request found between ${fromUserId} and ${toUserId}.`);
         return;
     }
 
@@ -206,7 +197,6 @@ export const acceptFollowRequest = (fromUserId: string, toUserId: string) => {
     const fromUser = db.users.find(u => u.id === fromUserId);
     const toUser = db.users.find(u => u.id === toUserId);
     if (!fromUser || !toUser) {
-        console.error(`[db] Accept request failed: One or both users not found (${fromUserId}, ${toUserId}).`);
         return;
     }
 
@@ -235,7 +225,6 @@ export const addSession = (userId: string, sessionData: { topic: string, duratio
     const db = readDB();
     const user = db.users.find(u => u.id === userId);
     if (!user) {
-        console.error(`[db] Session not added: User with id ${userId} not found.`);
         return;
     }
 
