@@ -291,7 +291,7 @@ export const PracticeSheetsPage: React.FC = () => {
             <div className="fixed bottom-6 right-6 z-50">
                 <button
                     onClick={handlePixiIconClick}
-                    className={`relative p-4 bg-primary rounded-full shadow-xl hover:scale-110 transition-transform duration-200 flex items-center justify-center ${hasPendingPixiError && !isPixiChatOpen ? 'animate-pulse' : ''}`}
+                    className={`relative p-4 bg-primary rounded-full shadow-xl hover:scale-110 transition-transform duration-200 flex items-center justify-center ${ ((hasPendingPixiError || isPixiTyping) && !isPixiChatOpen) ? 'animate-pulse' : '' }`}
                     aria-label="Open Pixi Chat: Tiny helper. Big progress."
                 >
                     <PixiAvatar className="!bg-transparent" svgClassName="!text-white" />

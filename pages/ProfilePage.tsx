@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { LEVELS } from '../constants';
 import { Card } from '../components/common/Card';
@@ -7,7 +8,8 @@ import { LevelBadge } from '../components/common/LevelBadge';
 import { ProgressBar } from '../components/common/ProgressBar';
 import * as db from '../services/db';
 import { useAuth } from '../contexts/AuthContext';
-import { Language } from '../types';
+// FIX: Import User type from types.ts
+import { Language, User } from '../types';
 
 const FireIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M14.5 4.5A5 5 0 0 0 9.5 0 5 5 0 0 0 4.5 4.5c0 2.924 2.16 5.343 5 5.343A5.002 5.002 0 0 0 14.5 4.5zM9.5 9.843c-2.84 0-5 2.419-5 5.343A5 5 0 0 0 9.5 20a5 5 0 0 0 5-4.814c0-2.924-2.16-5.343-5-5.343z"/></svg>
@@ -18,14 +20,46 @@ const XPIcon = (props: React.SVGProps<SVGSVGElement>) => (
 const CodeIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
 );
+const EditIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+);
+const CameraIcon = (props: React.SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+);
+
+
+// Helper function to convert File to Base64
+const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+    });
+};
+
 
 export const ProfilePage: React.FC = () => {
     const { userId } = useParams();
     const { currentUser, refreshUser } = useAuth();
     const [motivationSent, setMotivationSent] = useState(false);
-    
+    const [isEditing, setIsEditing] = useState(false);
+    const [newName, setNewName] = useState('');
+    const [newAvatarFile, setNewAvatarFile] = useState<File | null>(null);
+    const [newAvatarPreview, setNewAvatarPreview] = useState<string | null>(null);
+    const avatarInputRef = useRef<HTMLInputElement>(null);
+
     const user = db.getUser(userId!);
     const isCurrentUser = userId === currentUser?.id;
+
+    // Initialize newName when user or editing status changes
+    React.useEffect(() => {
+        if (user) {
+            setNewName(user.name);
+            setNewAvatarPreview(user.avatarUrl); // Start preview with current avatar
+        }
+    }, [user, isEditing]);
+
 
     if (!user) {
         return (
@@ -50,6 +84,72 @@ export const ProfilePage: React.FC = () => {
         setTimeout(() => setMotivationSent(false), 3000);
     };
 
+    const handleEditToggle = () => {
+        setIsEditing(prev => !prev);
+        // Reset temporary states if cancelling edit
+        if (isEditing) {
+            setNewName(user.name);
+            setNewAvatarFile(null);
+            setNewAvatarPreview(user.avatarUrl);
+            console.log("Edit cancelled. Resetting to:", user.name, user.avatarUrl);
+        } else {
+            console.log("Entering edit mode for user:", user.name, user.avatarUrl);
+        }
+    };
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewName(e.target.value);
+        console.log("New name input:", e.target.value);
+    };
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            console.log("Selected avatar file:", file.name, file.type);
+            setNewAvatarFile(file);
+            const previewUrl = await fileToBase64(file);
+            setNewAvatarPreview(previewUrl);
+            console.log("New avatar preview generated (Base64 length):", previewUrl.length);
+        }
+    };
+
+    const handleSaveProfile = async () => {
+        console.log("Attempting to save profile...");
+        if (!user || !isCurrentUser) {
+            console.warn("Save aborted: User not found or not current user.");
+            return;
+        }
+
+        const updates: Partial<User> = {};
+        if (newName.trim() !== user.name) {
+            updates.name = newName.trim();
+            console.log("Name changed:", user.name, "->", updates.name);
+        }
+
+        // Check if a new avatar file was explicitly selected
+        // We ensure newAvatarFile is not null AND that the preview URL is different from the original (to avoid saving the same thing)
+        if (newAvatarFile && newAvatarPreview && newAvatarPreview !== user.avatarUrl) {
+            updates.avatarUrl = newAvatarPreview; // This is already the Base64 string
+            console.log("Avatar changed (new Base64 length):", updates.avatarUrl.length);
+        } else if (newAvatarFile && newAvatarPreview === user.avatarUrl) {
+            console.warn("New avatar file selected, but preview matches old avatar URL. Skipping avatar update.");
+        }
+        
+        console.log("Updates prepared:", updates);
+
+        if (Object.keys(updates).length > 0) {
+            console.log("Calling db.updateUserProfile with:", user.id, updates);
+            db.updateUserProfile(user.id, updates);
+            console.log("Profile updated in DB. Refreshing user context...");
+            refreshUser(); // Update the currentUser state in AuthContext
+            console.log("User context refreshed.");
+        } else {
+            console.log("No changes detected, skipping DB update.");
+        }
+        setIsEditing(false); // Exit editing mode
+        console.log("Exiting edit mode.");
+    };
+
     const currentLevel = LEVELS.find(l => l.name === user.level) || LEVELS[0];
     const nextLevelIndex = LEVELS.findIndex(l => l.xpThreshold > user.xp);
     const nextLevel = nextLevelIndex !== -1 ? LEVELS[nextLevelIndex] : null;
@@ -59,10 +159,59 @@ export const ProfilePage: React.FC = () => {
 
     return (
         <div className="p-4 space-y-6">
-            <Card className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8">
-                <img src={user.avatarUrl} alt={user.name} className="w-32 h-32 rounded-full shadow-lg" />
+            <Card className="flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-8 relative">
+                {isCurrentUser && (
+                    <div className="absolute top-4 right-4">
+                        {!isEditing ? (
+                            <Button variant="secondary" onClick={handleEditToggle} className="!px-4 !py-2">
+                                <EditIcon className="w-4 h-4 mr-2" /> Edit Profile
+                            </Button>
+                        ) : (
+                            <div className="flex space-x-2">
+                                <Button variant="primary" onClick={handleSaveProfile} className="!px-4 !py-2">Save Changes</Button>
+                                <Button variant="ghost" onClick={handleEditToggle} className="!px-4 !py-2">Cancel</Button>
+                            </div>
+                        )}
+                    </div>
+                )}
+                
+                <div className="relative group">
+                    <img 
+                        src={newAvatarPreview || user.avatarUrl} 
+                        alt={user.name} 
+                        className="w-32 h-32 rounded-full shadow-lg object-cover" 
+                    />
+                    {isEditing && (
+                        <>
+                            <input 
+                                type="file" 
+                                accept="image/*" 
+                                ref={avatarInputRef} 
+                                className="hidden" 
+                                onChange={handleAvatarChange} 
+                            />
+                            <button
+                                onClick={() => avatarInputRef.current?.click()}
+                                className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-md hover:bg-indigo-700 transition-colors transform translate-x-1 translate-y-1 group-hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                aria-label="Change profile picture"
+                            >
+                                <CameraIcon className="w-5 h-5" />
+                            </button>
+                        </>
+                    )}
+                </div>
+
                 <div className="flex-grow text-center md:text-left">
-                    <h1 className="text-3xl sm:text-4xl font-bold">{user.name}</h1>
+                    {isEditing ? (
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={handleNameChange}
+                            className="text-3xl sm:text-4xl font-bold w-full bg-transparent border-b-2 border-indigo-500 focus:outline-none dark:text-gray-100"
+                        />
+                    ) : (
+                        <h1 className="text-3xl sm:text-4xl font-bold">{user.name}</h1>
+                    )}
                     <LevelBadge levelName={user.level} size="lg" />
                     <p className="text-gray-500 dark:text-gray-400 mt-2">Learning {user.learningLanguage}</p>
                 </div>
@@ -110,7 +259,7 @@ export const ProfilePage: React.FC = () => {
                                 <CodeIcon className="w-6 h-6" /> {user.learningLanguage}
                             </p>
                         </div>
-                        {isCurrentUser && (
+                        {isCurrentUser && !isEditing && ( // Only allow language switch outside of general editing mode
                             <Button variant="secondary" onClick={handleLanguageSwitch}>
                                 Switch
                             </Button>
