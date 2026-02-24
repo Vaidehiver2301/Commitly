@@ -1,74 +1,70 @@
-🚀 Commitly
+# 🚀 Commitly
 
-Commitly is a productivity-focused web application designed to help users track goals, manage tasks, and build consistent habits through structured commitments.
+Commitly is a productivity-focused web application designed to help users create, manage, and track their commitments effectively. It helps users stay consistent with goals through structured task tracking and progress monitoring.
 
-🔗 Live Project: [https://commitly-ai.netlify.app/]
+🔗 **Live Project:** [https://commitly-ai.netlify.app/]
 
-📌 Features
+---
 
-✅ Create and manage commitments/goals
+## 📌 Features
 
-📝 Add, update, and delete tasks
+- ✅ Create and manage commitments
+- 📝 Add, edit, and delete tasks
+- 📊 Track progress
+- ⚡ Clean and responsive UI
+- 🎯 Goal-oriented task organization
 
-📊 Track progress visually
+---
 
-🔒 User-friendly and intuitive interface
+## 🛠️ Tech Stack
 
-⚡ Fast and responsive design
+- HTML
+- CSS
+- React
+- Node.js
+- JavaScript  
+---
 
-🛠️ Tech Stack
+## ⚙️ Installation & Setup
 
-Frontend:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Vaidehiver2301/Commitly.git
+````
 
-HTML
+2. Navigate to the project directory:
 
-CSS
+   ```bash
+   cd Commitly
+   ```
 
-React
+3. Open `index.html` in your browser
+   or use Live Server in VS Code.
 
-Node.js
+---
 
-JavaScript
+## 🎯 Future Enhancements
 
+* 🔐 User authentication system
+* ☁️ Backend & database integration
+* 📈 Advanced analytics dashboard
+* 📱 Improved mobile responsiveness
 
+---
 
-⚙️ Installation & Setup
-
-Clone the repository
-
-git clone https://github.com/Vaidehiver2301/Commitly.git
-
-Navigate to the project folder
-
-cd Commitly
-
-Open index.html in your browser
-OR
-Use Live Server (if using VS Code)
-
-🎯 Future Enhancements
-
-🔐 User authentication system
-
-☁️ Database integration
-
-📈 Advanced analytics dashboard
-
-📱 Fully responsive mobile optimization
-
-🤝 Contributing
+## 🤝 Contributing
 
 Contributions are welcome!
-If you'd like to improve this project:
 
-Fork the repository
+1. Fork the repository
+2. Create a new branch
+3. Commit your changes
+4. Push to your branch
+5. Open a Pull Request
 
-Create a new branch
+---
 
-Make your changes
-
-Submit a pull request
-
-📜 License
+## 📜 License
 
 This project is open-source and available under the MIT License.
+
