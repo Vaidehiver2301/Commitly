@@ -1,20 +1,74 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+🚀 Commitly
 
-# Run and deploy your AI Studio app
+Commitly is a productivity-focused web application designed to help users track goals, manage tasks, and build consistent habits through structured commitments.
 
-This contains everything you need to run your app locally.
+🔗 Live Project: [https://commitly-ai.netlify.app/]
 
-View your app in AI Studio: https://ai.studio/apps/drive/1eJtBa4AgGDtEHyMwZCe9IfvHa4hQtB_s
+📌 Features
 
-## Run Locally
+✅ Create and manage commitments/goals
 
-**Prerequisites:**  Node.js
+📝 Add, update, and delete tasks
+
+📊 Track progress visually
+
+🔒 User-friendly and intuitive interface
+
+⚡ Fast and responsive design
+
+🛠️ Tech Stack
+
+Frontend:
+
+HTML
+
+CSS
+
+React
+
+Node.js
+
+JavaScript
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+
+⚙️ Installation & Setup
+
+Clone the repository
+
+git clone https://github.com/Vaidehiver2301/Commitly.git
+
+Navigate to the project folder
+
+cd Commitly
+
+Open index.html in your browser
+OR
+Use Live Server (if using VS Code)
+
+🎯 Future Enhancements
+
+🔐 User authentication system
+
+☁️ Database integration
+
+📈 Advanced analytics dashboard
+
+📱 Fully responsive mobile optimization
+
+🤝 Contributing
+
+Contributions are welcome!
+If you'd like to improve this project:
+
+Fork the repository
+
+Create a new branch
+
+Make your changes
+
+Submit a pull request
+
+📜 License
+
+This project is open-source and available under the MIT License.
